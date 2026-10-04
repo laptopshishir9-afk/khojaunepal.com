@@ -1,0 +1,45 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies and build static bundle
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          mkdir -p public-bundle
+          cp dist/assets/app-bundle.js public-bundle/app-bundle.js
+          cp dist/assets/app-bundle.css public-bundle/app-bundle.css
+
+      - name: Commit compiled bundle to branch for Deploy from a branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f public-bundle/app-bundle.js public-bundle/app-bundle.css
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update precompiled static bundle [skip ci]"
+            git push
+          fi

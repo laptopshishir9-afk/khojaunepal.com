@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build",
+    "build": "vite build && mkdir -p public-bundle && cp dist/assets/app-bundle.js public-bundle/app-bundle.js && cp dist/assets/app-bundle.css public-bundle/app-bundle.css",
     "start": "tsx server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",

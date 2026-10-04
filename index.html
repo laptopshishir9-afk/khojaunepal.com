@@ -51,29 +51,42 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./dist/assets/app-bundle.css" />
   </head>
   <body class="bg-[#FAFAFA] text-[#18181B] antialiased selection:bg-red-500 selection:text-white overflow-x-hidden">
     <div id="root"></div>
+    <script type="module" src="./src/main.tsx"></script>
     <script>
       (function () {
         var isStatic =
           window.location.hostname.indexOf('github.io') !== -1 ||
           window.location.protocol === 'file:';
 
-        var script = document.createElement('script');
-        script.type = 'module';
-        script.src = isStatic ? './dist/assets/app-bundle.js' : './src/main.tsx';
-        script.onerror = function () {
-          // Fallback to prebuilt bundle if ./src/main.tsx fails on any custom static domain
-          if (!isStatic) {
-            var fallback = document.createElement('script');
-            fallback.type = 'module';
-            fallback.src = './dist/assets/app-bundle.js';
-            document.body.appendChild(fallback);
-          }
-        };
-        document.body.appendChild(script);
+        function loadPrebuiltBundle() {
+          if (window.__khojauMounted || window.__khojauBundleLoaded) return;
+          window.__khojauBundleLoaded = true;
+
+          var cssLink = document.createElement('link');
+          cssLink.rel = 'stylesheet';
+          cssLink.href = './public-bundle/app-bundle.css';
+          document.head.appendChild(cssLink);
+
+          var script = document.createElement('script');
+          script.type = 'module';
+          script.src = './public-bundle/app-bundle.js';
+          document.body.appendChild(script);
+        }
+
+        if (isStatic) {
+          loadPrebuiltBundle();
+        } else {
+          window.addEventListener('load', function () {
+            setTimeout(function () {
+              if (!window.__khojauMounted) {
+                loadPrebuiltBundle();
+              }
+            }, 350);
+          });
+        }
       })();
     </script>
   </body>
